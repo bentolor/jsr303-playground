@@ -16,18 +16,22 @@
 
 package de.exxcellent.beanvalidation.example;
 
+import java.util.Set;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
 import javax.persistence.Query;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import de.exxcellent.beanvalidation.example.groups.CheckOnDeletion;
 import static org.junit.Assert.*;
 
 public class CustomerTest {
@@ -78,11 +82,9 @@ public class CustomerTest {
             fail("Expected ConstraintViolationException wasn't thrown.");
         } catch (ConstraintViolationException e) {
             assertEquals(1, e.getConstraintViolations().size());
-            ConstraintViolation<?> violation = e.getConstraintViolations()
-                    .iterator().next();
+            ConstraintViolation<?> violation = e.getConstraintViolations().iterator().next();
             assertEquals("name", violation.getPropertyPath().toString());
-            assertSame(Size.class, violation.getConstraintDescriptor()
-                    .getAnnotation().annotationType());
+            assertSame(Size.class, violation.getConstraintDescriptor().getAnnotation().annotationType());
         }
     }
 
@@ -102,17 +104,14 @@ public class CustomerTest {
             fail("Expected ConstraintViolationException wasn't thrown.");
         } catch (ConstraintViolationException e) {
             assertEquals(1, e.getConstraintViolations().size());
-            ConstraintViolation<?> violation = e.getConstraintViolations()
-                    .iterator().next();
+            ConstraintViolation<?> violation = e.getConstraintViolations().iterator().next();
             assertEquals("name", violation.getPropertyPath().toString());
-            assertSame(Size.class, violation.getConstraintDescriptor()
-                    .getAnnotation().annotationType());
+            assertSame(Size.class, violation.getConstraintDescriptor().getAnnotation().annotationType());
         }
     }
 
     @Test
     public void validCustomer() {
-
         Customer customer = new Customer("Bob");
         em.persist(customer);
         em.flush();
@@ -139,7 +138,16 @@ public class CustomerTest {
         customer.setArchived(true);
         em.remove(customer);
         em.flush();
-        assertTrue(em.createNamedQuery(Customer.FIND_ALL_CUSTOMERS)
-                           .getResultList().isEmpty());
+        assertTrue(em.createNamedQuery(Customer.FIND_ALL_CUSTOMERS).getResultList().isEmpty());
+    }
+
+    @Test
+    public void testNotNull() {
+        Customer customer = new Customer("Froo");
+
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<Customer>> issues = validator.validate(customer, CheckOnDeletion.class);
+
+        assertEquals(1, issues.size());
     }
 }

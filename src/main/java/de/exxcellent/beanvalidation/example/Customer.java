@@ -17,14 +17,12 @@ package de.exxcellent.beanvalidation.example;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-
 import de.exxcellent.beanvalidation.example.groups.CheckOnDeletion;
 import de.exxcellent.beanvalidation.example.groups.CheckOnUpdate;
 
@@ -35,7 +33,7 @@ public class Customer {
     public final static String FIND_ALL_CUSTOMERS = "findAllCustomers";
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @NotNull(groups = CheckOnUpdate.class)
     private Long id;
 
@@ -47,7 +45,6 @@ public class Customer {
     private boolean archived;
 
     public Customer() {
-
     }
 
     public Customer(String name) {
